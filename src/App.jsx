@@ -152,6 +152,12 @@ function App() {
     return "비추천";
   };
 
+  const getScoreClass = (score) => {
+    if (score >= 70) return "score-good";
+    if (score >= 40) return "score-normal";
+    return "score-bad";
+  };
+
   const makeHourlyForecast = (items) => {
     const times = [...new Set(items.map((item) => item.fcstTime))].slice(0, 6);
 
@@ -178,6 +184,7 @@ function App() {
         time: `${time.slice(0, 2)}시`,
         score,
         label: getScoreLabel(score),
+        className: getScoreClass(score),
       };
     });
   };
@@ -258,6 +265,7 @@ function App() {
           rain: day.rain,
           score,
           label: getScoreLabel(score),
+          className: getScoreClass(score),
           reason: day.rain
             ? "비 예보로 실외 건조에 불리합니다."
             : score >= 60
@@ -351,12 +359,14 @@ function App() {
         level: "잘 마름",
         emoji: "☀️",
         className: "good",
+        scoreClass: getScoreClass(score),
         time: "약 3~4시간",
         score,
         smellRisk,
         action: "오늘은 실외 건조 추천",
         message: "기온과 습도 조건이 좋아 빨래가 빠르게 마를 가능성이 높습니다.",
         tip: "얇은 옷과 수건류 모두 건조하기 좋은 조건입니다.",
+        oneLine: "오늘은 빨래하기 좋은 날입니다. 실외 건조도 충분히 추천됩니다.",
       };
     }
 
@@ -365,12 +375,14 @@ function App() {
         level: "느리게 마름",
         emoji: "🌥️",
         className: "normal",
+        scoreClass: getScoreClass(score),
         time: "약 5~7시간",
         score,
         smellRisk,
         action: "실내·실외 모두 가능",
         message: "건조는 가능하지만 평소보다 시간이 오래 걸릴 수 있습니다.",
         tip: "옷 사이 간격을 넓히고 선풍기 순환을 함께 사용하세요.",
+        oneLine: "오늘은 건조가 가능하지만 습도와 바람 조건을 함께 확인하는 것이 좋습니다.",
       };
     }
 
@@ -379,12 +391,14 @@ function App() {
         level: "냄새 위험",
         emoji: rain ? "🌧️" : "💧",
         className: rain ? "rain" : "bad",
+        scoreClass: getScoreClass(score),
         time: "약 8시간 이상",
         score,
         smellRisk,
         action: "제습기 사용 추천",
         message: "습도가 높아 빨래 냄새가 발생할 가능성이 있습니다.",
         tip: "제습기 또는 에어컨 제습 모드를 함께 사용하는 것을 추천합니다.",
+        oneLine: "오늘은 습도가 높아 냄새 위험이 있으므로 제습기 사용을 추천합니다.",
       };
     }
 
@@ -392,12 +406,14 @@ function App() {
       level: "실내 건조 추천",
       emoji: rain ? "🌧️" : "💧",
       className: rain ? "rain" : "bad",
+      scoreClass: getScoreClass(score),
       time: "실외 건조 비추천",
       score,
       smellRisk,
       action: "실내 건조 권장",
       message: "비 또는 높은 습도로 인해 실외 건조에 적합하지 않습니다.",
       tip: "창문을 닫고 제습기, 선풍기, 에어컨 제습 모드를 함께 사용하세요.",
+      oneLine: "오늘은 실외 건조보다 실내 건조와 제습기 사용이 더 안전합니다.",
     };
   };
 
@@ -466,7 +482,9 @@ function App() {
             }}
             placeholder="지역/주소 입력 예: 역북동, 명지대 자연캠퍼스, 서울 강남역"
           />
-          <button onClick={handleSearch}>조회하기</button>
+          <button onClick={handleSearch}>
+            {loading ? "분석 중..." : "조회하기"}
+          </button>
         </div>
 
         <p className="city-guide">전국 지역 검색 가능 · 기상청 API + OpenWeather 5일 예보 활용</p>
@@ -487,7 +505,7 @@ function App() {
             </div>
 
             <div className="summary-right">
-              <div className="score-circle">
+              <div className={`score-circle ${laundryStatus.scoreClass}`}>
                 <strong>{laundryStatus.score}</strong>
                 <span>/100</span>
               </div>
@@ -506,6 +524,11 @@ function App() {
                 <strong>{laundryStatus.smellRisk}%</strong>
               </div>
             </div>
+          </section>
+
+          <section className="today-summary">
+            <strong>오늘의 한줄 요약</strong>
+            <p>{laundryStatus.oneLine}</p>
           </section>
 
           <section className="weather-grid">
@@ -591,7 +614,7 @@ function App() {
 
               <div className="weekly-list">
                 {weeklyList.map((day) => (
-                  <div className={`weekly-card ${day.rain ? "rainy" : ""}`} key={day.date}>
+                  <div className={`weekly-card ${day.className} ${day.rain ? "rainy" : ""}`} key={day.date}>
                     <p>{day.date}</p>
                     <h4>{day.label}</h4>
                     <strong>{day.score}점</strong>
@@ -614,7 +637,7 @@ function App() {
 
             <div className="hourly-list">
               {hourlyList.map((item) => (
-                <div className="hour-card" key={item.time}>
+                <div className={`hour-card ${item.className}`} key={item.time}>
                   <p>{item.time}</p>
                   <strong>{item.score}점</strong>
                   <span>{item.label}</span>
