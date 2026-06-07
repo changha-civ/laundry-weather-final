@@ -1,3 +1,4 @@
+```jsx
 import "./App.css";
 import { useState } from "react";
 
@@ -13,11 +14,6 @@ function App() {
   const [weeklyList, setWeeklyList] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const isNight = () => {
-    const hour = new Date().getHours();
-    return hour >= 19 || hour < 6;
-  };
 
   const getBaseDateTime = () => {
     const now = new Date();
@@ -62,6 +58,7 @@ function App() {
     let sn =
       Math.tan(Math.PI * 0.25 + slat2 * 0.5) /
       Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+
     sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
 
     let sf = Math.tan(Math.PI * 0.25 + slat1 * 0.5);
@@ -142,6 +139,7 @@ function App() {
       const humidity = items.find((item) => item.category === "REH" && item.fcstTime === time)?.fcstValue;
       const wind = items.find((item) => item.category === "WSD" && item.fcstTime === time)?.fcstValue;
       const rainType = items.find((item) => item.category === "PTY" && item.fcstTime === time)?.fcstValue;
+
       const score = calculateScore({ temp, humidity, wind, rainType });
 
       return {
@@ -195,7 +193,11 @@ function App() {
       dailyMap[date].wind.push(wind);
       dailyMap[date].scores.push(score);
 
-      if (item.weather[0].main === "Rain" || item.weather[0].main === "Snow" || item.pop >= 0.5) {
+      if (
+        item.weather[0].main === "Rain" ||
+        item.weather[0].main === "Snow" ||
+        item.pop >= 0.5
+      ) {
         dailyMap[date].rain = true;
       }
     });
@@ -206,6 +208,7 @@ function App() {
       .slice(0, 5)
       .map((day) => {
         const score = Math.round(avg(day.scores));
+
         return {
           date: day.date,
           temp: Math.round(avg(day.temps)),
@@ -357,15 +360,6 @@ function App() {
     };
   };
 
-  const getScene = () => {
-    if (!weather) return isNight() ? "night" : "sunny";
-    if (String(weather.rainType) === "3" || String(weather.rainType) === "7") return "snow";
-    if (Number(weather.rainType) > 0) return "rain";
-    if (isNight()) return "night";
-    if (Number(weather.humidity) >= 75) return "cloudy";
-    return "sunny";
-  };
-
   const getReasons = () => {
     if (!weather) return [];
     const list = [];
@@ -400,25 +394,20 @@ function App() {
     const now = new Date();
     return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(
       now.getDate()
-    ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} 기준`;
+    ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")} 기준`;
   };
 
   const laundryStatus = getLaundryStatus();
   const bestDay = getBestLaundryDay();
-  const scene = getScene();
 
   return (
-    <div className={`app ${scene} ${laundryStatus ? laundryStatus.className : ""}`}>
-      <div className={`side-motion left ${scene}`}>
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div className={`side-motion right ${scene}`}>
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-
+    <div className={`app ${laundryStatus ? laundryStatus.className : ""}`}>
       <section className="hero">
         <div className="badge">자취생 맞춤 기상 서비스</div>
-        <h1>빨래 건조 위험도 예측 서비스</h1>
+        <h1>LaundryCast</h1>
+        <p className="brand-subtitle">자취생 맞춤 빨래 건조 예측 서비스</p>
         <p className="subtitle">
           지역 기상 데이터를 분석해 빨래 건조 점수, 냄새 위험도, 예상 건조 시간,
           주간 빨래 추천일과 행동 가이드를 제공하는 생활 밀착형 웹서비스입니다.
@@ -599,3 +588,4 @@ function App() {
 }
 
 export default App;
+```
