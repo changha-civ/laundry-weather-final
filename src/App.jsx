@@ -1,4 +1,3 @@
-```jsx
 import "./App.css";
 import { useState } from "react";
 
@@ -15,6 +14,24 @@ function App() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isNight = () => {
+    const hour = new Date().getHours();
+    return hour >= 19 || hour < 6;
+  };
+
+  const getScene = () => {
+    if (!weather) return isNight() ? "night" : "sunny";
+
+    const rainType = String(weather.rainType);
+
+    if (rainType === "3" || rainType === "7") return "snow";
+    if (Number(rainType) > 0) return "rain";
+    if (isNight()) return "night";
+    if (Number(weather.humidity) >= 75) return "cloudy";
+
+    return "sunny";
+  };
+
   const getBaseDateTime = () => {
     const now = new Date();
     const target = new Date(now);
@@ -28,6 +45,7 @@ function App() {
 
   const getRainText = (rainType) => {
     const code = String(rainType);
+
     if (code === "0") return "비 없음";
     if (code === "1") return "비";
     if (code === "2") return "비/눈";
@@ -35,6 +53,7 @@ function App() {
     if (code === "5") return "빗방울";
     if (code === "6") return "빗방울/눈날림";
     if (code === "7") return "눈날림";
+
     return "정보 없음";
   };
 
@@ -71,8 +90,10 @@ function App() {
     ra = (re * sf) / Math.pow(ra, sn);
 
     let theta = lon * DEGRAD - olon;
+
     if (theta > Math.PI) theta -= 2.0 * Math.PI;
     if (theta < -Math.PI) theta += 2.0 * Math.PI;
+
     theta *= sn;
 
     return {
@@ -135,10 +156,21 @@ function App() {
     const times = [...new Set(items.map((item) => item.fcstTime))].slice(0, 6);
 
     return times.map((time) => {
-      const temp = items.find((item) => item.category === "T1H" && item.fcstTime === time)?.fcstValue;
-      const humidity = items.find((item) => item.category === "REH" && item.fcstTime === time)?.fcstValue;
-      const wind = items.find((item) => item.category === "WSD" && item.fcstTime === time)?.fcstValue;
-      const rainType = items.find((item) => item.category === "PTY" && item.fcstTime === time)?.fcstValue;
+      const temp = items.find(
+        (item) => item.category === "T1H" && item.fcstTime === time
+      )?.fcstValue;
+
+      const humidity = items.find(
+        (item) => item.category === "REH" && item.fcstTime === time
+      )?.fcstValue;
+
+      const wind = items.find(
+        (item) => item.category === "WSD" && item.fcstTime === time
+      )?.fcstValue;
+
+      const rainType = items.find(
+        (item) => item.category === "PTY" && item.fcstTime === time
+      )?.fcstValue;
 
       const score = calculateScore({ temp, humidity, wind, rainType });
 
@@ -157,6 +189,7 @@ function App() {
     }
 
     const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=kr`;
+
     const response = await fetch(url);
     const data = await response.json();
 
@@ -183,10 +216,18 @@ function App() {
       const temp = item.main.temp;
       const humidity = item.main.humidity;
       const wind = item.wind.speed;
-      const rainType =
-        item.weather[0].main === "Rain" || item.weather[0].main === "Snow" ? 1 : 0;
 
-      const score = calculateScore({ temp, humidity, wind, rainType });
+      const rainType =
+        item.weather[0].main === "Rain" || item.weather[0].main === "Snow"
+          ? 1
+          : 0;
+
+      const score = calculateScore({
+        temp,
+        humidity,
+        wind,
+        rainType,
+      });
 
       dailyMap[date].temps.push(temp);
       dailyMap[date].humidity.push(humidity);
@@ -362,6 +403,7 @@ function App() {
 
   const getReasons = () => {
     if (!weather) return [];
+
     const list = [];
 
     if (Number(weather.rainType) > 0) {
@@ -392,22 +434,24 @@ function App() {
 
   const getCurrentTimeText = () => {
     const now = new Date();
-    return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(
-      now.getDate()
-    ).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")} 기준`;
+
+    return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(now.getDate()).padStart(2, "0")} ${String(
+      now.getHours()
+    ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} 기준`;
   };
 
   const laundryStatus = getLaundryStatus();
   const bestDay = getBestLaundryDay();
+  const scene = getScene();
 
   return (
-    <div className={`app ${laundryStatus ? laundryStatus.className : ""}`}>
+    <div className={`app ${scene} ${laundryStatus ? laundryStatus.className : ""}`}>
       <section className="hero">
         <div className="badge">자취생 맞춤 기상 서비스</div>
-        <h1>LaundryCast</h1>
-        <p className="brand-subtitle">자취생 맞춤 빨래 건조 예측 서비스</p>
+        <h1>빨래 건조 위험도 예측 서비스</h1>
         <p className="subtitle">
           지역 기상 데이터를 분석해 빨래 건조 점수, 냄새 위험도, 예상 건조 시간,
           주간 빨래 추천일과 행동 가이드를 제공하는 생활 밀착형 웹서비스입니다.
@@ -465,10 +509,26 @@ function App() {
           </section>
 
           <section className="weather-grid">
-            <div className="info-card"><span>🌡️</span><p>기온</p><strong>{weather.temp}℃</strong></div>
-            <div className="info-card"><span>💧</span><p>습도</p><strong>{weather.humidity}%</strong></div>
-            <div className="info-card"><span>💨</span><p>풍속</p><strong>{weather.wind}m/s</strong></div>
-            <div className="info-card"><span>🌧️</span><p>강수형태</p><strong>{weather.rainText}</strong></div>
+            <div className="info-card">
+              <span>🌡️</span>
+              <p>기온</p>
+              <strong>{weather.temp}℃</strong>
+            </div>
+            <div className="info-card">
+              <span>💧</span>
+              <p>습도</p>
+              <strong>{weather.humidity}%</strong>
+            </div>
+            <div className="info-card">
+              <span>💨</span>
+              <p>풍속</p>
+              <strong>{weather.wind}m/s</strong>
+            </div>
+            <div className="info-card">
+              <span>🌧️</span>
+              <p>강수형태</p>
+              <strong>{weather.rainText}</strong>
+            </div>
           </section>
 
           <section className="decision-grid">
@@ -494,10 +554,22 @@ function App() {
               <p>기온, 습도, 풍속, 강수 여부를 반영해 빨래 건조 가능성을 계산합니다.</p>
             </div>
             <div className="standard-grid">
-              <div><strong>기온</strong><p>높을수록 건조 속도 증가</p></div>
-              <div><strong>습도</strong><p>높을수록 냄새 위험 증가</p></div>
-              <div><strong>풍속</strong><p>공기 순환이 좋을수록 유리</p></div>
-              <div><strong>강수</strong><p>비·눈 예보 시 큰 감점</p></div>
+              <div>
+                <strong>기온</strong>
+                <p>높을수록 건조 속도 증가</p>
+              </div>
+              <div>
+                <strong>습도</strong>
+                <p>높을수록 냄새 위험 증가</p>
+              </div>
+              <div>
+                <strong>풍속</strong>
+                <p>공기 순환이 좋을수록 유리</p>
+              </div>
+              <div>
+                <strong>강수</strong>
+                <p>비·눈 예보 시 큰 감점</p>
+              </div>
             </div>
           </section>
 
@@ -511,7 +583,9 @@ function App() {
               {bestDay && (
                 <div className="best-day-box">
                   <p>이번 주 가장 추천하는 빨래 날짜</p>
-                  <strong>{bestDay.date} · {bestDay.label} · {bestDay.score}점</strong>
+                  <strong>
+                    {bestDay.date} · {bestDay.label} · {bestDay.score}점
+                  </strong>
                 </div>
               )}
 
@@ -522,7 +596,9 @@ function App() {
                     <h4>{day.label}</h4>
                     <strong>{day.score}점</strong>
                     <span>{day.rain ? "비 예보 있음" : "비 예보 없음"}</span>
-                    <small>{day.temp}℃ · 습도 {day.humidity}% · 풍속 {day.wind}m/s</small>
+                    <small>
+                      {day.temp}℃ · 습도 {day.humidity}% · 풍속 {day.wind}m/s
+                    </small>
                     <em>{day.reason}</em>
                   </div>
                 ))}
@@ -554,10 +630,18 @@ function App() {
             </div>
 
             <div className="guide-grid">
-              <div>제습기 <strong>{laundryStatus.score < 60 ? "ON 추천" : "선택"}</strong></div>
-              <div>창문 <strong>{Number(weather.rainType) > 0 ? "닫기" : "환기 가능"}</strong></div>
-              <div>옷 간격 <strong>넓게 배치</strong></div>
-              <div>두꺼운 빨래 <strong>{laundryStatus.score >= 75 ? "가능" : "피하기"}</strong></div>
+              <div>
+                제습기 <strong>{laundryStatus.score < 60 ? "ON 추천" : "선택"}</strong>
+              </div>
+              <div>
+                창문 <strong>{Number(weather.rainType) > 0 ? "닫기" : "환기 가능"}</strong>
+              </div>
+              <div>
+                옷 간격 <strong>넓게 배치</strong>
+              </div>
+              <div>
+                두꺼운 빨래 <strong>{laundryStatus.score >= 75 ? "가능" : "피하기"}</strong>
+              </div>
             </div>
           </section>
 
@@ -568,10 +652,18 @@ function App() {
             </div>
 
             <div className="clothes-list">
-              <div>얇은 옷 <strong>{laundryStatus.score >= 40 ? "가능" : "비추천"}</strong></div>
-              <div>수건류 <strong>{laundryStatus.score >= 70 ? "가능" : "주의"}</strong></div>
-              <div>후드티 <strong>{laundryStatus.score >= 75 ? "가능" : "실내 추천"}</strong></div>
-              <div>이불 <strong>{laundryStatus.score >= 80 ? "가능" : "비추천"}</strong></div>
+              <div>
+                얇은 옷 <strong>{laundryStatus.score >= 40 ? "가능" : "비추천"}</strong>
+              </div>
+              <div>
+                수건류 <strong>{laundryStatus.score >= 70 ? "가능" : "주의"}</strong>
+              </div>
+              <div>
+                후드티 <strong>{laundryStatus.score >= 75 ? "가능" : "실내 추천"}</strong>
+              </div>
+              <div>
+                이불 <strong>{laundryStatus.score >= 80 ? "가능" : "비추천"}</strong>
+              </div>
             </div>
           </section>
         </main>
@@ -588,4 +680,3 @@ function App() {
 }
 
 export default App;
-```
