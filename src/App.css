@@ -1,4 +1,3 @@
-```css
 @import url("https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap");
 
 * {
@@ -61,6 +60,44 @@ body {
   right: 0;
 }
 
+.scene-label {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  opacity: 0.92;
+  z-index: 3;
+}
+
+.sunny .scene-label {
+  color: #ffb300;
+  text-shadow: 0 0 16px rgba(255, 196, 0, 0.7);
+}
+
+.cloudy .scene-label {
+  color: #7d8796;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.rain .scene-label {
+  color: #eef4ff;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+}
+
+.snow .scene-label {
+  color: white;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.85);
+}
+
+.night .scene-label {
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.95);
+}
+
 .side-motion span {
   position: absolute;
   display: block;
@@ -69,7 +106,6 @@ body {
   opacity: 0.95;
 }
 
-/* 왼쪽 / 오른쪽 위치 */
 .side-motion.left span {
   left: 24%;
 }
@@ -155,6 +191,41 @@ body {
 .side-motion span:nth-child(5) {
   top: -104%;
   animation-delay: 1.6s;
+}
+
+.side-motion span:nth-child(6) {
+  top: -126%;
+  animation-delay: 2s;
+}
+
+.side-motion span:nth-child(7) {
+  top: -148%;
+  animation-delay: 2.4s;
+}
+
+.side-motion span:nth-child(8) {
+  top: -170%;
+  animation-delay: 2.8s;
+}
+
+.side-motion span:nth-child(9) {
+  top: -192%;
+  animation-delay: 3.2s;
+}
+
+.side-motion span:nth-child(10) {
+  top: -214%;
+  animation-delay: 3.6s;
+}
+
+.side-motion span:nth-child(11) {
+  top: -236%;
+  animation-delay: 4s;
+}
+
+.side-motion span:nth-child(12) {
+  top: -258%;
+  animation-delay: 4.4s;
 }
 
 @keyframes sunnyDrop {
@@ -623,7 +694,7 @@ footer {
   border-radius: 22px;
   padding: 24px;
   text-align: center;
-  transition: 0.25s;
+  transition: 0.28s ease;
 }
 
 .standard-grid div:hover,
@@ -632,8 +703,8 @@ footer {
 .hour-card:hover,
 .weekly-card:hover,
 .info-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
 }
 
 .standard-grid strong {
@@ -757,6 +828,76 @@ footer {
   font-size: 14px;
 }
 
+/* ===== 날씨별 강조 ===== */
+
+.app.sunny .summary-left h2 {
+  color: #ff9800;
+}
+
+.app.sunny .score-circle {
+  border-color: #ffd54f;
+  background: #fff9df;
+}
+
+.app.rain .summary-left h2 {
+  color: #2979ff;
+}
+
+.app.rain .score-circle {
+  border-color: #90caf9;
+  background: #eaf4ff;
+}
+
+.app.snow .summary-left h2 {
+  color: #4b6584;
+}
+
+/* ===== 밤 모드 보정 ===== */
+
+.app.night .hero,
+.app.night .summary-card,
+.app.night .section-card,
+.app.night .weather-grid,
+.app.night .decision-grid {
+  background: rgba(18, 26, 42, 0.82);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.app.night .hero h1,
+.app.night .summary-left h2,
+.app.night .section-title h3,
+.app.night .score-info h3,
+.app.night .info-card strong,
+.app.night .guide-grid strong,
+.app.night .clothes-list strong {
+  color: white;
+}
+
+.app.night .subtitle,
+.app.night .summary-message,
+.app.night .section-title p,
+.app.night .score-info p,
+.app.night .info-card p,
+.app.night footer,
+.app.night .location-name {
+  color: #c8d4e5;
+}
+
+.app.night .summary-left,
+.app.night .summary-right,
+.app.night .info-card,
+.app.night .estimate-card,
+.app.night .reason-card,
+.app.night .reason-card li,
+.app.night .weekly-card,
+.app.night .hour-card,
+.app.night .guide-grid div,
+.app.night .clothes-list div,
+.app.night .standard-grid div {
+  background: rgba(28, 40, 62, 0.88);
+}
+
 /* ===== 반응형 ===== */
 
 @media (max-width: 1100px) {
@@ -864,7 +1005,11 @@ footer {
 
   .side-motion {
     width: 80px;
-    opacity: 0.7;
+    opacity: 0.45;
+  }
+
+  .scene-label {
+    font-size: 14px;
+    top: 18px;
   }
 }
-```

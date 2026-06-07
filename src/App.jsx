@@ -1,4 +1,3 @@
-```jsx
 import "./App.css";
 import { useState } from "react";
 
@@ -20,15 +19,42 @@ function App() {
     return hour >= 19 || hour < 6;
   };
 
+  const getScene = () => {
+    if (!weather) return isNight() ? "night" : "sunny";
+
+    const rainType = String(weather.rainType);
+
+    if (rainType === "3" || rainType === "7") return "snow";
+    if (Number(rainType) > 0) return "rain";
+    if (isNight()) return "night";
+    if (Number(weather.humidity) >= 70) return "cloudy";
+
+    return "sunny";
+  };
+
+  const getSceneLabel = () => {
+    const scene = getScene();
+
+    if (scene === "rain") return "비 오는 날";
+    if (scene === "snow") return "눈 오는 날";
+    if (scene === "night") return "밤 시간";
+    if (scene === "cloudy") return "흐린 날";
+    return "햇빛 쨍쨍";
+  };
+
+  const renderMotionSpans = () =>
+    Array.from({ length: 12 }).map((_, index) => <span key={index}></span>);
+
   const getBaseDateTime = () => {
     const now = new Date();
     const target = new Date(now);
     target.setMinutes(target.getMinutes() - 45);
 
     return {
-      base_date: `${target.getFullYear()}${String(
-        target.getMonth() + 1
-      ).padStart(2, "0")}${String(target.getDate()).padStart(2, "0")}`,
+      base_date: `${target.getFullYear()}${String(target.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}${String(target.getDate()).padStart(2, "0")}`,
       base_time: `${String(target.getHours()).padStart(2, "0")}00`,
     };
   };
@@ -393,19 +419,6 @@ function App() {
     };
   };
 
-  const getScene = () => {
-    if (!weather) return isNight() ? "night" : "sunny";
-
-    const rainType = String(weather.rainType);
-
-    if (rainType === "3" || rainType === "7") return "snow";
-    if (Number(rainType) > 0) return "rain";
-    if (isNight()) return "night";
-    if (Number(weather.humidity) >= 70) return "cloudy";
-
-    return "sunny";
-  };
-
   const getReasons = () => {
     if (!weather) return [];
 
@@ -455,19 +468,13 @@ function App() {
   return (
     <div className={`app ${scene} ${laundryStatus ? laundryStatus.className : ""}`}>
       <div className={`side-motion left ${scene}`}>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+        <div className="scene-label">{getSceneLabel()}</div>
+        {renderMotionSpans()}
       </div>
 
       <div className={`side-motion right ${scene}`}>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+        <div className="scene-label">{getSceneLabel()}</div>
+        {renderMotionSpans()}
       </div>
 
       <section className="hero">
@@ -702,4 +709,3 @@ function App() {
 }
 
 export default App;
-```
